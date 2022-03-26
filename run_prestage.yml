@@ -1,7 +1,8 @@
 --- 
 
-- hosts: setup
-  become: true
+- name: Initial
+  hosts: setup
+  remote_user: root
 
   vars: 
     - user: localadmin
@@ -13,7 +14,6 @@
     apt:
       update_cache: yes
     when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
-
 
   - name: install sudo
     package:
@@ -58,3 +58,26 @@
     async: 1
     poll: 0
 
+- name: Check system comes backonline 
+  hosts: setup 
+  remote_user: localadmin
+  gather_facts: false 
+  become: true
+
+  tasks: 
+
+  - name: Wait for the reboot and reconnect 
+    remote_user: localadmin
+    wait_for:
+      port: 22
+      host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+      search_regex: OpenSSH
+      delay: 10
+      timeout: 60
+    connection: local
+
+  - name: Check the Uptime of the servers
+    shell: "uptime"
+    register: Uptime
+
+  - debug: var=Uptime

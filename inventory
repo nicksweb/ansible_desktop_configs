@@ -1,5 +1,13 @@
+[network]
 pi@172.16.0.26
 localadmin@172.16.0.28
+
+[services]
+localadmin@172.16.2.101
 localadmin@172.16.1.241
 localadmin@172.16.1.242
 localadmin@172.16.1.249
+
+
+[setup]
+#root@172.16.2.101

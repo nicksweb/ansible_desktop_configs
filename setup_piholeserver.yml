@@ -1,0 +1,10 @@
+--- 
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Run APT Update
+    apt:
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'

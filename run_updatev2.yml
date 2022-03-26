@@ -1,3 +1,4 @@
+# Inspired by the post at Cyberciti.biz - Source: https://www.cyberciti.biz/faq/ansible-apt-update-all-packages-on-ubuntu-debian-linux/
 ---
 - hosts: servers
   become: true

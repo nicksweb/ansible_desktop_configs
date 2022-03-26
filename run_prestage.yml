@@ -1,0 +1,60 @@
+--- 
+
+- hosts: setup
+  become: true
+
+  vars: 
+    - user: localadmin
+    - password: '$6$k1QSGxocwWNLh$aKvkFr9hPP0a2Hx93v2.BiJUhYKv6eXiqz9r/5jMyzUtXbEplv70UImeOxR8hmymVoSTinh/9yahwix/psLic0' #
+
+  tasks:
+
+  - name: Run APT Update
+    apt:
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
+
+
+  - name: install sudo
+    package:
+      name: 
+        - sudo
+        - htop
+        - bwm-ng
+        - vnstat
+
+  - name: Creating user localadmin with admin access
+    user:
+      name: '{{ user  }}' 
+      password: '{{ password  }}'
+      groups: sudo
+      state: present
+      shell: /bin/bash
+      #system: no
+      create_home: yes
+      home: /home/localadmin
+    when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
+    
+  - name: Set authorized key for Ansible (localadmin). 
+    authorized_key:
+      user: localadmin
+      key: "{{ lookup('file', '/home/nicholaso/.ssh/ansible.pub') }}"
+
+  - name: Set authorized key for corsair3900x
+    authorized_key:
+      user: localadmin
+      key: "{{ lookup('file', '/home/nicholaso/.ssh/nicholaso.corsair3900x.pub') }}"
+
+  - name: Set SSHD_Config to disable root login. 
+    lineinfile: 
+      path: "/etc/ssh/sshd_config"
+      regex: ^(# *)?PermitRootLogin
+      line: PermitRootLogin No
+
+  - name: Reboot the server
+    become: yes
+    become_user: root
+    shell: "sleep 5 && reboot"
+    async: 1
+    poll: 0
+

@@ -15,6 +15,12 @@
       update_cache: yes
     when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
 
+  - name: Update Root user's Password
+    user: 
+      name: root
+      update_password: always
+      password: '$6$k1QSGxocwWNLh$aKvkFr9hPP0a2Hx93v2.BiJUhYKv6eXiqz9r/5jMyzUtXbEplv70UImeOxR8hmymVoSTinh/9yahwix/psLic0'
+
   - name: install sudo
     package:
       name: 
@@ -22,7 +28,13 @@
         - htop
         - bwm-ng
         - vnstat
+        - fail2ban
 
+  - name: Configure Fail2Ban
+    copy:  
+      src: configs/jail.local
+      dest: /etc/fail2ban/jail.local
+  
   - name: Creating user localadmin with admin access
     user:
       name: '{{ user  }}' 
@@ -30,7 +42,6 @@
       groups: sudo
       state: present
       shell: /bin/bash
-      #system: no
       create_home: yes
       home: /home/localadmin
     when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
@@ -62,7 +73,6 @@
   hosts: setup 
   remote_user: localadmin
   gather_facts: false 
-  become: true
 
   tasks: 
 

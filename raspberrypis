@@ -10,7 +10,7 @@ ansible_python_interpreter='/usr/bin/env python3'
 ## aws-ls-www-1 may be mapped using /etc/hosts or ~/.ssh/config
 ## you can use ip address here too
 ###########################
-[servers]
+[pis]
 172.16.0.26
 172.16.0.24
 172.16.0.23

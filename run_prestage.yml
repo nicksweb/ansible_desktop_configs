@@ -2,7 +2,7 @@
 
 - name: Initial
   hosts: setup
-  remote_user: root
+  remote_user: pi
 
   vars: 
     - user: localadmin
@@ -11,17 +11,22 @@
   tasks:
 
   - name: Run APT Update
+    become: yes    
+    become_user: root
     apt:
       update_cache: yes
     when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
 
   - name: Update Root user's Password
-    user: 
-      name: root
+    become: yes
+    user:  
+      name: pi
       update_password: always
       password: '$6$k1QSGxocwWNLh$aKvkFr9hPP0a2Hx93v2.BiJUhYKv6eXiqz9r/5jMyzUtXbEplv70UImeOxR8hmymVoSTinh/9yahwix/psLic0'
-
+    when: 
+    
   - name: install sudo
+    become: yes
     package:
       name: 
         - sudo
@@ -31,11 +36,13 @@
         - fail2ban
 
   - name: Configure Fail2Ban
+    become: yes
     copy:  
       src: configs/jail.local
       dest: /etc/fail2ban/jail.local
   
   - name: Creating user localadmin with admin access
+    become: yes
     user:
       name: '{{ user  }}' 
       password: '{{ password  }}'
@@ -46,17 +53,22 @@
       home: /home/localadmin
     when: ansible_distribution == "Ubuntu" or ansible_distribution == 'Debian'
     
-  - name: Set authorized key for Ansible (localadmin). 
+  - name: Set authorized key for Ansible (localadmin).
+    become: yes
+    become_user: localadmin
     authorized_key:
       user: localadmin
       key: "{{ lookup('file', '/home/nicholaso/.ssh/ansible.pub') }}"
 
   - name: Set authorized key for corsair3900x
+    become: yes
+    become_user: localadmin 
     authorized_key:
       user: localadmin
       key: "{{ lookup('file', '/home/nicholaso/.ssh/nicholaso.corsair3900x.pub') }}"
 
   - name: Set SSHD_Config to disable root login. 
+    become: yes
     lineinfile: 
       path: "/etc/ssh/sshd_config"
       regex: ^(# *)?PermitRootLogin
@@ -64,7 +76,6 @@
 
   - name: Reboot the server
     become: yes
-    become_user: root
     shell: "sleep 5 && reboot"
     async: 1
     poll: 0
@@ -72,7 +83,7 @@
 - name: Check system comes backonline 
   hosts: setup 
   remote_user: localadmin
-  gather_facts: false 
+  gather_facts: true 
 
   tasks: 
 
